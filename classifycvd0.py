@@ -16,8 +16,7 @@ from PIL import Image
 import os
 import matplotlib.pyplot as plt
 
-!unzip -q TrainingData.zip #named file
-!ls TrainingData #should return unfriendlyCVD and friendlyCVD
+os.listdir("TrainingData") #should return unfriendlyCVD and friendlyCVD
 
 image_size = (180, 180) #modify this, this might be too small to work. 
 batch_size = 32
