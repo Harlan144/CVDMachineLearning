@@ -12,18 +12,18 @@ from tensorflow import keras
 from keras import layers
 #from pathlib import Path
 import glob
-from PIL import Image
+#from PIL import Image
 import os
 import matplotlib.pyplot as plt
 
-os.listdir("TrainingData") #should return unfriendlyCVD and friendlyCVD
+os.listdir("TrainingDataset") #should return unfriendlyCVD and friendlyCVD
 
 image_size = (180, 180) #modify this, this might be too small to work. 
 batch_size = 32
 seed = 123
 validation_split=0.20 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    "TrainingData/",
+    "TrainingDataset/",
     validation_split=validation_split,
     labels='inferred', #might not need this line
     label_mode='binary', #might not need this line
@@ -33,7 +33,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     batch_size=batch_size,
 )
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    "TrainingData/",
+    "TrainingDataset/",
     validation_split=validation_split,
     labels='inferred', #might not need this line
     label_mode='binary', #might not need this line
@@ -43,7 +43,7 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     batch_size=batch_size,
 )
 test_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    "TestData/",
+    "TestImages/",
     image_size=image_size,
     shuffle=False
 )
@@ -106,7 +106,7 @@ def make_model(input_shape, num_classes):
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dropout(0.5)(x)
 
-    outputs = layers.Dense(2, activation="sigmoid")(x)
+    outputs = layers.Dense(1, activation="sigmoid")(x)
     return keras.Model(inputs, outputs)
 
 model = make_model(input_shape=image_size + (3,) , num_classes=2)
