@@ -78,7 +78,7 @@ model.compile(
     metrics=tf.keras.metrics.AUC(),
 )
 
-model.load_weights("SavesModel0/save_at_15.h5")
+model.load_weights("Saves/save_at_15.h5")
 
 
 

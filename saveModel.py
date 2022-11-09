@@ -56,7 +56,7 @@ def make_model(input_shape, num_classes):
 test_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TestImages/",
     image_size=image_size,
-    shuffle=False
+    shuffle=True
 )
 
 
@@ -89,8 +89,10 @@ model.compile(
 model.load_weights("Saves/save_at_15.h5")
 
 
-score = model.evaluate(test_ds, verbose=2)
-print(score[1])
+score = model.evaluate(test_ds)[1:]
+print(len(score))
+for i in range(len(score)):
+    print(METRICS[i], score[i])
 #for i in range(len(metrics)):
 #    print(METRICS[i], metrics[i])
 

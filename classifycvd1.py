@@ -63,6 +63,10 @@ class_weight[0]=class_weight[0]/total
 class_weight[1]=class_weight[1]/total
 print(class_weight)
 
+initial_bias = np.log([class_weight[1]/class_weight[0]])
+print(initial_bias)
+
+
 
 data_augmentation = keras.Sequential(
     [
@@ -71,7 +75,7 @@ data_augmentation = keras.Sequential(
     ]
 )
 
-def make_model(input_shape, num_classes):
+def make_model(input_shape):
     inputs = keras.Input(shape=input_shape)
     # Image augmentation block
     x = data_augmentation(inputs) #apply augmentation
@@ -116,12 +120,10 @@ def make_model(input_shape, num_classes):
     outputs = layers.Dense(1, activation="sigmoid")(x)
     return keras.Model(inputs, outputs)
 
-model = make_model(input_shape=image_size + (3,) , num_classes=2)
+model = make_model(input_shape=image_size + (3,))
 model.summary()
 
-epochs = 15
-
-
+epochs = 50
 
 callbacks = [
     keras.callbacks.ModelCheckpoint("Saves/save_at_{epoch}.h5"),
