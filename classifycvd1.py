@@ -1,15 +1,81 @@
-import os
+# -*- coding: utf-8 -*-
+"""
+CVD Machine Learning 0.0
+"""
+
+"""
+Imports
+"""
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
+#from pathlib import Path
+import glob
+#from PIL import Image
+import os
 import matplotlib.pyplot as plt
 
-image_size= (180,180)
+os.listdir("TrainingDataset") #should return unfriendlyCVD and friendlyCVD
+
+image_size = (180, 180) #modify this, this might be too small to work. 
+batch_size = 32
+seed = 123
+validation_split=0.20 
+
+train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    "TrainingDataset/",
+    validation_split=validation_split,
+    labels='inferred', #might not need this line
+    label_mode='binary', #might not need this line
+    subset="training",
+    seed=seed, #I don't really understand this
+    image_size=image_size,
+    batch_size=batch_size,
+)
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    "TrainingDataset/",
+    validation_split=validation_split,
+    labels='inferred', #might not need this line
+    label_mode='binary', #might not need this line
+    subset="validation",
+    seed=seed,
+    image_size=image_size,
+    batch_size=batch_size,
+)
+test_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    "TestImages/",
+    image_size=image_size,
+    shuffle=False
+)
+
+
+class_weight = {0:0, 1:0}
+y = np.concatenate([y for x, y in train_ds], axis=0)
+total = 0
+for i in y:
+    if int(i[0]) in class_weight:
+        class_weight[int(i[0])]+=1
+        total+=1
+    else:
+        print("Error:",i)
+class_weight[0]=class_weight[0]/total
+class_weight[1]=class_weight[1]/total
+print(class_weight)
+
+
+data_augmentation = keras.Sequential(
+    [
+        layers.RandomFlip("horizontal"),
+        layers.RandomRotation(0.1), #need more augmenting factors 
+    ]
+)
 
 def make_model(input_shape, num_classes):
     inputs = keras.Input(shape=input_shape)
     # Image augmentation block
-    x = layers.Rescaling(1./255)(inputs)
+    x = data_augmentation(inputs) #apply augmentation
+    x = layers.Rescaling(1./255)(x)
 
     # Entry block
     x = layers.Conv2D(32, 3, strides=2, padding="same")(x)
@@ -50,24 +116,17 @@ def make_model(input_shape, num_classes):
     outputs = layers.Dense(1, activation="sigmoid")(x)
     return keras.Model(inputs, outputs)
 
-# Evaluate the model
-
-
-test_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    "TestImages/",
-    image_size=image_size,
-    shuffle=False
-)
-
-
-
-#Not trained:
-#model = make_model(input_shape=image_size + (3,) , num_classes=2)
-#loss, acc = model.evaluate(test_ds, verbose=2)
-#print("Untrained model, accuracy: {:5.2f}%".format(100 * acc))
-
-
 model = make_model(input_shape=image_size + (3,) , num_classes=2)
+model.summary()
+
+epochs = 15
+
+
+
+callbacks = [
+    keras.callbacks.ModelCheckpoint("Saves/save_at_{epoch}.h5"),
+]
+
 METRICS = [
       keras.metrics.TruePositives(name='tp'),
       keras.metrics.FalsePositives(name='fp'),
@@ -85,14 +144,12 @@ model.compile(
     loss="binary_crossentropy",
     metrics=METRICS,
 )
+model.fit(
+    train_ds, 
+    epochs=epochs, 
+    callbacks=callbacks, 
+    validation_data=val_ds,
+    class_weight=class_weight
+)
 
-model.load_weights("Saves/save_at_15.h5")
 
-
-score = model.evaluate(test_ds, verbose=2)
-print(score[1])
-#for i in range(len(metrics)):
-#    print(METRICS[i], metrics[i])
-
-
-#print("Trained model, AUROC: {:5.2f}%".format(100 * auc))

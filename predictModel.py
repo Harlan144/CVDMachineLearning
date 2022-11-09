@@ -1,7 +1,9 @@
 import os
 import tensorflow as tf
+import numpy as np
 from tensorflow import keras
 from keras import layers
+#from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 
 image_size= (180,180)
@@ -55,10 +57,10 @@ def make_model(input_shape, num_classes):
 
 test_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TestImages/",
+    labels= 'inferred',
     image_size=image_size,
     shuffle=False
 )
-
 
 
 #Not trained:
@@ -76,18 +78,32 @@ model.compile(
     metrics=tf.keras.metrics.AUC(),
 )
 
-model.load_weights("Saves/save_at_15.h5")
+model.load_weights("SavesModel0/save_at_15.h5")
 
 
+
+
+y = np.concatenate([y for x, y in test_ds], axis=0)
+print(y)
 
 predictions = model.predict(test_ds)
-largestValue = max(predictions)
-multipliedPredict=  predictions/largestValue
-percentUnfriendly = 47/(388+47)
+#con_mat = tf.math.confusion_matrix(labels=y_true, predictions=predictions).numpy()
 
-for i in range(len(multipliedPredict)):
-    if multipliedPredict[i]>1-percentUnfriendly:
-        print(test_ds.file_paths[i], "unfriendly")
-    #print(multipliedPredict[i], test_ds.file_paths[i])
-#print(predictions)
-#print("Untrained model, AUROC: {:5.2f}%".format(100 * auc))
+#largestValue = max(predictions)
+#multipliedPredict=  predictions/largestValue
+#percentUnfriendly = 47/(388+47)
+
+#sortedPred= sorted(predictions)
+#val = sortedPred[-47]
+for i in range(len(predictions)):
+    print(test_ds.file_paths[i], predictions[i]) 
+        
+
+"""
+sortedPred= sorted(predictions)
+for i in sortedPred[-47:]:
+    for index in range(len(predictions)):
+        if i == predictions[index]:
+            print(i, test_ds.file_paths[index])
+            break
+"""
