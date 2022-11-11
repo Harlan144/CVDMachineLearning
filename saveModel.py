@@ -86,7 +86,7 @@ model.compile(
     metrics=METRICS,
 )
 
-model.load_weights("Saves/save_at_15.h5")
+model.load_weights("Saves/save_at_16.h5")
 
 
 score = model.evaluate(test_ds)[1:]
