@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-CVD Machine Learning 0.0
+CVD Machine Learning 4.0
 """
 
 """
@@ -16,6 +16,14 @@ import glob
 import os
 import matplotlib.pyplot as plt
 from functions import *
+from tensorflow.keras.applications import ResNet50
+
+base_model = ResNet50(weights='imagenet', 
+                             input_shape=(180, 180, 3),
+                             include_top=False)
+
+base_model.trainable = False
+
 
 os.listdir("TrainingDataset") #should return unfriendlyCVD and friendlyCVD
 
@@ -75,7 +83,7 @@ print('Weight for unfriendly, class 1: {:.2f}'.format(class_weight[1]))
 data_augmentation = keras.Sequential(
     [
         layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.2), #need more augmenting factors 
+        layers.RandomRotation(0.1), #need more augmenting factors 
     ]
 )
 
@@ -83,47 +91,17 @@ def make_model(input_shape, output_bias):
     output_bias = tf.keras.initializers.Constant(output_bias)
     
     inputs = keras.Input(shape=input_shape)
+
     # Image augmentation block
     #####APPLY DATA AUGMENTATION LATER
     x = data_augmentation(inputs) #apply augmentation
     #####
     x = layers.Rescaling(1./255)(x)
 
-    # Entry block
-    x = layers.Conv2D(32, 3, strides=2, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    x = layers.Conv2D(64, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    previous_block_activation = x  # Set aside residual
-
-    for size in [128, 256, 512, 728]:
-        x = layers.Activation("relu")(x)
-        x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Activation("relu")(x)
-        x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
-
-        # Project residual
-        residual = layers.Conv2D(size, 1, strides=2, padding="same")(
-            previous_block_activation
-        )
-        x = layers.add([x, residual])  # Add back residual
-        previous_block_activation = x  # Set aside next residual
-
-    x = layers.SeparableConv2D(1024, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
+    x = base_model(x, training=False)
 
     x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.5)(x)
+    x = layers.Dropout(0.3)(x)
 
     outputs = layers.Dense(1, activation="sigmoid",bias_initializer=output_bias)(x)
     return keras.Model(inputs, outputs)

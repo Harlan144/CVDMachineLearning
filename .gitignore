@@ -1,7 +1,7 @@
 /CVDMachineLearning.code-workspace
 /TestImages
 /TrainingDataset
-/TestImages.zip
-/TrainingDataset.zip
-/OLDTestImages.zip
-/OLDTrainingDataset.zip
+ZipFiles/TestImages.zip
+ZipFiles/TrainingDataset.zip
+ZipFiles/OLDTestImages.zip
+ZipFiles/OLDTrainingDataset.zip

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -47,9 +48,4 @@ def plot_cm(labels, predictions, p=0.5):
   plt.title('Confusion matrix @{:.2f}'.format(p))
   plt.ylabel('Actual label')
   plt.xlabel('Predicted label')
-
-  print('Legitimate Transactions Detected (True Negatives): ', cm[0][0])
-  print('Legitimate Transactions Incorrectly Detected (False Positives): ', cm[0][1])
-  print('Fraudulent Transactions Missed (False Negatives): ', cm[1][0])
-  print('Fraudulent Transactions Detected (True Positives): ', cm[1][1])
-  print('Total Fraudulent Transactions: ', np.sum(cm[1]))
+  plt.savefig("Saves/PlotConfusionMatrix")
