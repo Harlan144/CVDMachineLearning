@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-CVD Machine Learning 5.0
+CVD Machine Learning 6.0
 """
 
 """
@@ -15,8 +15,7 @@ import os
 import matplotlib.pyplot as plt
 from functions import *
 from tensorflow.keras.applications import MobileNetV2
-
-
+from keras.models import Model
 
 
 image_size = (224, 224) #modify this, this might be too small to work. 
@@ -56,6 +55,7 @@ test_ds = tf.keras.preprocessing.image_dataset_from_directory(
     shuffle=False
 )
 
+test_labels = np.concatenate([y for x, y in test_ds], axis=0)
 
 class_weight = {0:0, 1:0}
 y = np.concatenate([y for x, y in train_ds], axis=0)
@@ -81,7 +81,7 @@ print('Weight for unfriendly, class 1: {:.2f}'.format(class_weight[1]))
 data_augmentation = keras.Sequential(
     [
         layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.1), #need more augmenting factors 
+        layers.RandomRotation(0.2), #need more augmenting factors 
     ]
 )
 
@@ -95,7 +95,7 @@ def make_model(input_shape, output_bias):
     x = base_model(x, training=False)
 
     x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.2)(x)
+    x = layers.Dropout(0.3)(x)
 
     outputs = layers.Dense(1, activation="sigmoid", bias_initializer=output_bias)(x)
     return keras.Model(inputs, outputs)
@@ -140,31 +140,52 @@ history = model.fit(
     class_weight=class_weight
 )
 
+plot_metrics(history, "Saves/history")
 
+
+with open("Saves/Evaluated", "w") as file:
+     results = model.evaluate(test_ds)
+     for name, value in zip(model.metrics_names, results):
+        file.write(str(name)+': '+str(value)+"\n")
+
+model.save("Saves/first_save.h5")
+predictions = model.predict(test_ds)
+plot_cm(test_labels, predictions, p=0.5, savePath="Saves/ConfusionMatrix1")
 
 base_model.trainable = True
+for i in model.layers:
+    i.trainable = True
+
 model.compile(optimizer=keras.optimizers.Adam(1e-5),  
               loss="binary_crossentropy",
               metrics=METRICS)
 
-new_callbacks = [
-    keras.callbacks.ModelCheckpoint("Saves/finetuning_save_at_{epoch}.h5"),
-    keras.callbacks.EarlyStopping(
-    verbose=1,
-    patience=5,
-    restore_best_weights=True)
-]
+# new_callbacks = [
+#     keras.callbacks.ModelCheckpoint("Saves/finetuning_save_at_{epoch}.h5", save_weights_only=True),
+#     keras.callbacks.EarlyStopping(
+#     verbose=1,
+#     patience=5,
+#     restore_best_weights=True)
+# ]
 
-history1 = model.fit(train_ds, epochs=15,validation_data=val_ds,callbacks=new_callbacks)
-
-
-plot_metrics(history)
+history1 = model.fit(train_ds, epochs=15,validation_data=val_ds)
 
 
-with open("Saves/Evaluated", "w") as file:
+base_model.trainable = False
+
+def freeze_layers(model):
+    for i in model.layers:
+        i.trainable = False
+        if isinstance(i, Model):
+            freeze_layers(i)
+    return model
+
+model_freezed = freeze_layers(model)
+model_freezed.save('Saves/last_save.h5')
+
+plot_metrics(history1, "Saves/history1")
+
+with open("Saves/EvaluatedFineTuning", "w") as file:
     results = model.evaluate(test_ds)
     for name, value in zip(model.metrics_names, results):
         file.write(str(name)+': '+str(value)+"\n")
-
-
-

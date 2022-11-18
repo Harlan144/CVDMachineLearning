@@ -18,7 +18,7 @@ def plot_prc(name, labels, predictions, **kwargs):
 
 
 
-def plot_metrics(history):
+def plot_metrics(history, savePath):
   
   metrics = ['loss', 'prc', 'precision', 'recall']
   for n, metric in enumerate(metrics):
@@ -37,15 +37,19 @@ def plot_metrics(history):
       plt.ylim([0,1])
 
     plt.legend()
-    plt.savefig("Saves/PlotMetrics")
+    plt.savefig(savePath)
 
 
 
-def plot_cm(labels, predictions, p=0.5):
+def plot_cm(labels, predictions, p=0.5, savePath="Saves/PlotConfusionMatrix"):  
   cm = confusion_matrix(labels, predictions > p)
   plt.figure(figsize=(5,5))
-  sns.heatmap(cm, annot=True, fmt="d")
-  plt.title('Confusion matrix @{:.2f}'.format(p))
+  #plt.rcParams.update({'font.size': 16})
+  sns.heatmap(cm, cmap=sns.color_palette("icefire", as_cmap=True), annot=True, annot_kws={'size': 15}, fmt="d")
+  plt.title('CNN Confusion matrix')
+  ax = plt.gca()
+  ax.set_xticklabels(['Friendly', 'Unfriendly'])
+  ax.set_yticklabels(['Friendly', 'Unfriendly'])
   plt.ylabel('Actual label')
   plt.xlabel('Predicted label')
   plt.savefig("Saves/PlotConfusionMatrix")

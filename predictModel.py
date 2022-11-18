@@ -6,6 +6,8 @@ from keras import layers
 #from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 
+from functions import plot_cm
+
 image_size= (180,180)
 
 def make_model(input_shape, num_classes):
@@ -78,15 +80,16 @@ model.compile(
     metrics=tf.keras.metrics.AUC(),
 )
 
-model.load_weights("Saves/save_at_15.h5")
+model.load_weights("Saves/save_at_16.h5")
 
 
 
 
-y = np.concatenate([y for x, y in test_ds], axis=0)
-print(y)
+test_labels = np.concatenate([y for x, y in test_ds], axis=0)
 
 predictions = model.predict(test_ds)
+converted_predictions = list(map(lambda x: 0 if x<0.5 else 1, predictions))
+
 #con_mat = tf.math.confusion_matrix(labels=y_true, predictions=predictions).numpy()
 
 #largestValue = max(predictions)
@@ -96,8 +99,10 @@ predictions = model.predict(test_ds)
 #sortedPred= sorted(predictions)
 #val = sortedPred[-47]
 for i in range(len(predictions)):
-    print(test_ds.file_paths[i], predictions[i]) 
-        
+    print(test_ds.file_paths[i], predictions[i], test_labels[i]) 
+
+
+plot_cm(test_labels, predictions)
 
 """
 sortedPred= sorted(predictions)
