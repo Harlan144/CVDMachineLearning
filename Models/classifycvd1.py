@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-CVD Machine Learning 0.0
+CVD Machine Learning 1.0
+Model includes data augmentation and class weighing. We do not use transfer learning or early stopping.
+An initial bias in the model is not used.
 """
 
 """
@@ -10,15 +12,12 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
-#from pathlib import Path
-import glob
-#from PIL import Image
 import os
 import matplotlib.pyplot as plt
 
 os.listdir("TrainingDataset") #should return unfriendlyCVD and friendlyCVD
 
-image_size = (180, 180) #modify this, this might be too small to work. 
+image_size = (180, 180)
 batch_size = 32
 seed = 123
 validation_split=0.20 
@@ -26,18 +25,18 @@ validation_split=0.20
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
-    label_mode='binary', #might not need this line
+    labels='inferred', 
+    label_mode='binary', 
     subset="training",
-    seed=seed, #I don't really understand this
+    seed=seed,
     image_size=image_size,
     batch_size=batch_size,
 )
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
-    label_mode='binary', #might not need this line
+    labels='inferred', 
+    label_mode='binary',
     subset="validation",
     seed=seed,
     image_size=image_size,
@@ -61,23 +60,23 @@ for i in y:
         print("Error:",i)
 class_weight[0]=class_weight[0]/total
 class_weight[1]=class_weight[1]/total
-print(class_weight)
+print(class_weight) #Check the class weights. We have far more Friendly images than unfriendly, so class_weight[0] should be greater.
 
-initial_bias = np.log([class_weight[1]/class_weight[0]])
-print(initial_bias)
+#initial_bias = np.log([class_weight[1]/class_weight[0]])
+#print(initial_bias) #Check our initial bias based on our inbalanced classes.
 
 
 
 data_augmentation = keras.Sequential(
     [
         layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.1), #need more augmenting factors 
+        layers.RandomRotation(0.1)
     ]
 )
 
 def make_model(input_shape):
     inputs = keras.Input(shape=input_shape)
-    # Image augmentation block
+
     x = data_augmentation(inputs) #apply augmentation
     x = layers.Rescaling(1./255)(x)
 
@@ -123,10 +122,10 @@ def make_model(input_shape):
 model = make_model(input_shape=image_size + (3,))
 model.summary()
 
-epochs = 50
+epochs = 15
 
 callbacks = [
-    keras.callbacks.ModelCheckpoint("Saves/save_at_{epoch}.h5"),
+    keras.callbacks.ModelCheckpoint("SavesModel1/save_at_{epoch}.h5"), 
 ]
 
 METRICS = [
@@ -146,12 +145,14 @@ model.compile(
     loss="binary_crossentropy",
     metrics=METRICS,
 )
+
 model.fit(
     train_ds, 
     epochs=epochs, 
     callbacks=callbacks, 
     validation_data=val_ds,
-    class_weight=class_weight
+    class_weight=class_weight #Call the class weights here to get more balanced results. Otherwise, the model predicts everything
+    # to be "Friendly".
 )
 
 

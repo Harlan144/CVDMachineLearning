@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-CVD Machine Learning 4.0
+CVD Machine Learning 4.0 (ResNet50)
+Model includes improved class weighing, early stoppping, data augmentation and transfer learning from ResNet50.
+No fine tuning is performed.
+An initial bias based on class weights is used.
 """
 
 """
@@ -18,9 +21,10 @@ import matplotlib.pyplot as plt
 from functions import *
 from tensorflow.keras.applications import ResNet50
 
+#Import ResNet50 model as our base model to build on.
 base_model = ResNet50(weights='imagenet', 
                              input_shape=(180, 180, 3),
-                             include_top=False)
+                             include_top=False) 
 
 base_model.trainable = False
 
@@ -83,7 +87,7 @@ print('Weight for unfriendly, class 1: {:.2f}'.format(class_weight[1]))
 data_augmentation = keras.Sequential(
     [
         layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.1), #need more augmenting factors 
+        layers.RandomRotation(0.1),
     ]
 )
 
@@ -92,16 +96,14 @@ def make_model(input_shape, output_bias):
     
     inputs = keras.Input(shape=input_shape)
 
-    # Image augmentation block
-    #####APPLY DATA AUGMENTATION LATER
     x = data_augmentation(inputs) #apply augmentation
-    #####
+
     x = layers.Rescaling(1./255)(x)
 
     x = base_model(x, training=False)
 
     x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.3)(x)
+    x = layers.Dropout(0.3)(x) #Lowered dropout rate from 0.5 to 0.3.
 
     outputs = layers.Dense(1, activation="sigmoid",bias_initializer=output_bias)(x)
     return keras.Model(inputs, outputs)
@@ -112,7 +114,7 @@ model.summary()
 epochs = 50
 
 callbacks = [
-    keras.callbacks.ModelCheckpoint("Saves/save_at_{epoch}.h5"),
+    keras.callbacks.ModelCheckpoint("SavesModel4/save_at_{epoch}.h5"),
     keras.callbacks.EarlyStopping(
     monitor='val_prc', 
     verbose=1,
@@ -149,10 +151,10 @@ history = model.fit(
 plot_metrics(history)
 
 
-with open("Saves/Evaluated", "w") as file:
+with open("SavesModel4/Evaluated", "w") as file:
     results = model.evaluate(test_ds)
     for name, value in zip(model.metrics_names, results):
-        file.write(name+': '+value)
+        file.write(str(name)+': '+str(value)+"\n")
 
 
 

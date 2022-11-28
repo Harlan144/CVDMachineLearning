@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-CVD Machine Learning 0.0
+CVD Machine Learning Version 3.0
+Model includes class weighing (fixed), early stoppping and data augmentation. We do not use transfer learning.
+An initial bias in the model based on class weights is used.
 """
 
 """
@@ -10,16 +12,13 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
-#from pathlib import Path
-import glob
-#from PIL import Image
 import os
 import matplotlib.pyplot as plt
 from functions import *
 
 os.listdir("TrainingDataset") #should return unfriendlyCVD and friendlyCVD
 
-image_size = (180, 180) #modify this, this might be too small to work. 
+image_size = (180, 180)
 batch_size = 32
 seed = 123
 validation_split=0.20 
@@ -27,7 +26,7 @@ validation_split=0.20
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
+    labels='inferred',
     label_mode='binary',
     subset="training",
     seed=seed,
@@ -37,7 +36,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
+    labels='inferred',
     label_mode='binary',
     subset="validation",
     seed=seed,
@@ -65,10 +64,11 @@ for i in y:
 initial_bias = np.log([class_weight[1]/class_weight[0]])
 print("Initial Bias: ", initial_bias)
 
-class_weight[0]=(1/class_weight[0])*(total/2)
+class_weight[0]=(1/class_weight[0])*(total/2) #changed how we weigh classes as compared to Model2 and Model1.
 class_weight[1]=(1/class_weight[1])*(total/2)
 
-print('Weight for friendly, class 0: {:.2f}'.format(class_weight[0]))
+#Used to confirm class weights
+print('Weight for friendly, class 0: {:.2f}'.format(class_weight[0])) 
 print('Weight for unfriendly, class 1: {:.2f}'.format(class_weight[1]))
 
 
@@ -84,7 +84,6 @@ def make_model(input_shape, output_bias):
     
     inputs = keras.Input(shape=input_shape)
     # Image augmentation block
-    #####APPLY DATA AUGMENTATION LATER
     x = data_augmentation(inputs) #apply augmentation
     #####
     x = layers.Rescaling(1./255)(x)
@@ -134,7 +133,7 @@ model.summary()
 epochs = 50
 
 callbacks = [
-    keras.callbacks.ModelCheckpoint("Saves/save_at_{epoch}.h5"),
+    keras.callbacks.ModelCheckpoint("SavesModel3/save_at_{epoch}.h5"),
     keras.callbacks.EarlyStopping(
     monitor='val_prc', 
     verbose=1,
@@ -171,10 +170,10 @@ history = model.fit(
 plot_metrics(history)
 
 
-with open("Saves/Evaluated", "w") as file:
+with open("SavesModel3/Evaluated", "w") as file:
     results = model.evaluate(test_ds)
     for name, value in zip(model.metrics_names, results):
-        file.write(name+': '+value)
+        file.write(str(name)+': '+str(value)+"\n")
 
 
 

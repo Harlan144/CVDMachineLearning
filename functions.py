@@ -1,3 +1,6 @@
+#Include functions to graph different metrics
+
+#Imports
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 import seaborn as sns

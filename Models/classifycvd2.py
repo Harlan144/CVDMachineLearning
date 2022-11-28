@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-CVD Machine Learning 0.0
+CVD Machine Learning 2.0
+Model includes class weighing and early stoppping. We do not use transfer learning. We tried not using data augmentation.
+An initial bias in the model IS used.
 """
 
 """
@@ -19,7 +21,7 @@ from functions import *
 
 os.listdir("TrainingDataset") #should return unfriendlyCVD and friendlyCVD
 
-image_size = (180, 180) #modify this, this might be too small to work. 
+image_size = (180, 180) 
 batch_size = 32
 seed = 123
 validation_split=0.20 
@@ -27,7 +29,7 @@ validation_split=0.20
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
+    labels='inferred', 
     label_mode='binary',
     subset="training",
     seed=seed,
@@ -37,7 +39,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
+    labels='inferred', 
     label_mode='binary',
     subset="validation",
     seed=seed,
@@ -63,7 +65,7 @@ for i in y:
 
 
 initial_bias = np.log([class_weight[1]/class_weight[0]])
-print("Initial Bias: ", initial_bias)
+print("Initial Bias: ", initial_bias) #Use initial_bias in the model to decrease loss in the first few epochs.
 
 class_weight[0]=(1/class_weight[0])*(total/2)
 class_weight[1]=(1/class_weight[1])*(total/2)
@@ -75,17 +77,17 @@ print('Weight for unfriendly, class 1: {:.2f}'.format(class_weight[1]))
 data_augmentation = keras.Sequential(
     [
         layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.1), #need more augmenting factors 
+        layers.RandomRotation(0.1), 
     ]
 )
 
 def make_model(input_shape, output_bias):
-    output_bias = tf.keras.initializers.Constant(output_bias)
+    output_bias = tf.keras.initializers.Constant(output_bias) #Use initial_bias defined above to decrease initial loss.
     
     inputs = keras.Input(shape=input_shape)
     # Image augmentation block
-    #####APPLY DATA AUGMENTATION LATER
-    # x = data_augmentation(inputs) #apply augmentation
+    #####Do not apply data augmentation
+    # x = data_augmentation(inputs)
     #####
     x = layers.Rescaling(1./255)(inputs)
 
@@ -123,7 +125,7 @@ def make_model(input_shape, output_bias):
     x = layers.Activation("relu")(x)
 
     x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.5)(x)
+    x = layers.Dropout(0.5)(x) #Decreases overfitting.
 
     outputs = layers.Dense(1, activation="sigmoid",bias_initializer=output_bias)(x)
     return keras.Model(inputs, outputs)
@@ -131,14 +133,14 @@ def make_model(input_shape, output_bias):
 model = make_model(input_shape=image_size + (3,) , output_bias=initial_bias)
 model.summary()
 
-epochs = 50
+epochs = 50 #Use early stopping, so only about 16 epochs are actually ran through.
 
 callbacks = [
-    keras.callbacks.ModelCheckpoint("Saves/save_at_{epoch}.h5"),
+    keras.callbacks.ModelCheckpoint("SavesModel2/save_at_{epoch}.h5"),
     keras.callbacks.EarlyStopping(
-    monitor='val_prc', 
+    monitor='val_prc',  #Stop when the precision is the highest.
     verbose=1,
-    patience=10,
+    patience=10, #Continue for up to 10 epochs after that.
     mode='max',
     restore_best_weights=True)
 ]
@@ -168,14 +170,13 @@ history = model.fit(
     class_weight=class_weight
 )
 
-plot_metrics(history)
+plot_metrics(history) #Plot the metrics as defined in our functions file.
 
 
-with open("Saves/Evaluated", "w") as file:
+with open("SavesModel2/Evaluated", "w") as file:
     results = model.evaluate(test_ds)
     for name, value in zip(model.metrics_names, results):
-        print(name, ': ', value)
-    print()
+        file.write(str(name)+': '+str(value)+"\n")
 
 
 

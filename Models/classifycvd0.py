@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-CVD Machine Learning 0.0
+CVD Machine Learning Version 0.0
+
+Model includes data augmentation, but not class weighing, transfer learning, or early stopping.
 """
 
 """
@@ -10,9 +12,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
-#from pathlib import Path
 import glob
-#from PIL import Image
 import os
 import matplotlib.pyplot as plt
 
@@ -20,35 +20,39 @@ os.listdir("TrainingDataset") #should return unfriendlyCVD and friendlyCVD
 
 image_size = (180, 180) #modify this, this might be too small to work. 
 batch_size = 32
-seed = 123
+seed = 123 #Random seed set for reproducibility. 
 validation_split=0.20 
+
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
-    label_mode='binary', #might not need this line
+    labels='inferred', 
+    label_mode='binary', 
     subset="training",
-    seed=seed, #I don't really understand this
+    seed=seed,
     image_size=image_size,
     batch_size=batch_size,
 )
+#Take 20% of train_ds and withhold as validation through the testing.
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "TrainingDataset/",
     validation_split=validation_split,
-    labels='inferred', #might not need this line
-    label_mode='binary', #might not need this line
+    labels='inferred',
+    label_mode='binary', 
     subset="validation",
     seed=seed,
     image_size=image_size,
     batch_size=batch_size,
 )
-test_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    "TestImages/",
-    image_size=image_size,
-    shuffle=False
-)
+# test_ds = tf.keras.preprocessing.image_dataset_from_directory(
+#     "TestImages/",
+#     image_size=image_size,
+#     shuffle=False
+# )
 
-#test to see it worked
+
+
+#Test to confirm it worked
 plt.figure(figsize=(10, 10))
 for images, labels in train_ds.take(1):
     for i in range(9):
@@ -56,17 +60,19 @@ for images, labels in train_ds.take(1):
         plt.imshow(images[i].numpy().astype("uint8"))
         plt.title(int(labels[i]))
         plt.axis("off") #1 is notFriendly #0 is friendly
+        #plt.savefig("TestImage")
+
 
 data_augmentation = keras.Sequential(
     [
         layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.1), #need more augmenting factors 
+        layers.RandomRotation(0.1),
     ]
 )
 
 def make_model(input_shape, num_classes):
     inputs = keras.Input(shape=input_shape)
-    # Image augmentation block
+
     x = data_augmentation(inputs) #apply augmentation
     x = layers.Rescaling(1./255)(x)
 
@@ -104,24 +110,25 @@ def make_model(input_shape, num_classes):
     x = layers.Activation("relu")(x)
 
     x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.5)(x)
+    x = layers.Dropout(0.5)(x) #Reduce overfitting
 
     outputs = layers.Dense(1, activation="sigmoid")(x)
     return keras.Model(inputs, outputs)
 
-model = make_model(input_shape=image_size + (3,) , num_classes=2)
+model = make_model(input_shape=image_size + (3,) , num_classes=2) #Create model
 model.summary()
 
-epochs = 15
+epochs = 15 #Run 15 epochs
 
 callbacks = [
-    keras.callbacks.ModelCheckpoint("Saves/save_at_{epoch}.h5"),
+    keras.callbacks.ModelCheckpoint("SavesModel0/save_at_{epoch}.h5"),
 ]
 model.compile(
     optimizer=keras.optimizers.Adam(1e-3),
     loss="binary_crossentropy",
     metrics=["accuracy"],
 )
+
 model.fit(
     train_ds, epochs=epochs, callbacks=callbacks, validation_data=val_ds,
 )
