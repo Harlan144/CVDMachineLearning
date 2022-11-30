@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 df = pd.read_csv("BioImageAnalysis/metrics_with_classification.tsv", delimiter="\t")
 df.set_index("image_file_path",inplace=True)
 df.drop(["firstPart","secondPart","article_id"], axis=1, inplace=True)
@@ -34,6 +35,7 @@ for i, label in enumerate(cols[:-1]):
     ax = plt.subplot(3, 3, i + 1)
     plt.scatter(df["Conclusion"],df[label])
     plt.title(str(label)+" corr: "+str(round(corr,3)))
+plt.subplots_adjust(wspace=0.4, hspace=0.3)
 plt.savefig("scatterPlots1.png")
 
 

@@ -168,12 +168,14 @@ model.compile(optimizer=keras.optimizers.Adam(1e-5),
               loss="binary_crossentropy",
               metrics=METRICS)
 
-# new_callbacks = [
-#     keras.callbacks.EarlyStopping(
-#     verbose=1,
-#     patience=10,
-#     restore_best_weights=True)
-# ]
+new_callbacks = [
+    keras.callbacks.EarlyStopping(
+    verbose=1,
+    patience=10,
+    restore_best_weights=True)
+]
+
+
 
 history1 = model.fit(train_ds, epochs=15,validation_data=val_ds)
 
