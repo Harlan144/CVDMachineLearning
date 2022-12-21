@@ -36,7 +36,7 @@ for i, label in enumerate(cols[:-1]):
     plt.scatter(df["Conclusion"],df[label])
     plt.title(str(label)+" corr: "+str(round(corr,3)))
 plt.subplots_adjust(wspace=0.4, hspace=0.3)
-plt.savefig("scatterPlots1.png")
+plt.savefig("scatterPlots.png")
 
 
 

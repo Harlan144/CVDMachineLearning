@@ -1,9 +1,0 @@
-Logistic Regression accuracy is 0.7246.
-Logistic Regression AUROC is 0.7986296812423888.
-
-SVC accuracy is 0.6383.
-SVC AUROC is 0.6805451981302232.
-
-Random Forest accuracy is 0.6113.
-Random Foresst AUROC is 0.8078306320331102.
-

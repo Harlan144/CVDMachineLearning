@@ -28,8 +28,6 @@ df["Conclusion"] = df["Conclusion"].replace({0:False,3:True})
 y = df.iloc[:,-1]
 #X refers to all other applicable columns.
 X = df.iloc[:,:-1]
-#print(df.head())
-#print(df.shape)
 
 with open("BioImageAnalysis Metrics", "w") as f:
     #Logistic regression
@@ -49,6 +47,8 @@ with open("BioImageAnalysis Metrics", "w") as f:
     f.write(f"SVC AUROC is {roc_auc_score(y, svmPredict)}.\n\n")
     
     #Random Foresst Classifier
+
+    #MODIFY MAX_DEPTH. TRY RESERVING 500 IMAGES AS TEST.
     RF = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0,class_weight="balanced")
     RF.fit(X, y)
     rfPred = RF.predict(X)
@@ -59,5 +59,16 @@ with open("BioImageAnalysis Metrics", "w") as f:
 
 
 #Save our randomForest predictions as a confusion matrix. 
-#ConfusionMatrixDisplay.from_predictions(y, rfPred, cmap=sns.color_palette("icefire", as_cmap=True))
-#plt.savefig("RFConfusionMatrix")
+ConfusionMatrixDisplay.from_predictions(y, rfPred, cmap=sns.color_palette("icefire", as_cmap=True))
+plt.savefig("RFConfusionMatrix")
+
+#BioImageAnalysis Metrics:
+
+# Logistic Regression accuracy is 0.7246.
+# Logistic Regression AUROC is 0.7986296812423888.
+
+# SVC accuracy is 0.6383.
+# SVC AUROC is 0.6805451981302232.
+
+# Random Forest accuracy is 0.6113.
+# Random Foresst AUROC is 0.8078306320331102.
