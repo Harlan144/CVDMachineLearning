@@ -4,7 +4,7 @@
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
-
+import pandas as pd
 
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
@@ -70,7 +70,7 @@ def plot_metrics(history, savePath):
 
 
 #create a confusion matrix
-def plot_cm(labels, predictions, p=0.5, savePath="Saves/PlotConfusionMatrix"):
+def plot_cm(labels, predictions, p=0.5, savePath="SavedModelOutputs/PlotConfusionMatrix"):
   #confusion maxtrix with labels from test images, 
   # predictions of model prediction of images that larger than p=0.5 
   cm = confusion_matrix(labels, predictions > p)
@@ -92,4 +92,11 @@ def plot_cm(labels, predictions, p=0.5, savePath="Saves/PlotConfusionMatrix"):
   plt.xlabel('Predicted label')
 
   #save figure at specific loction as 'plot_prc'
-  plt.savefig("Saves/PlotConfusionMatrix")
+  plt.savefig(savePath)
+
+def plotPredictions(predictionsFile, outputFile):
+  # libraries & dataset
+  df = pd.read_csv(predictionsFile,sep="\t", header=None, names=["Type","Prediction"])
+  ax = sns.boxplot(x='Type', y='Prediction', data=df)
+  ax = sns.swarmplot(x='Type', y='Prediction', data=df, color="grey")
+  plt.savefig(outputFile)

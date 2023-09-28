@@ -7,7 +7,10 @@ import numpy as np
 from tensorflow.keras.applications import ResNet50
 
 """
-Run Loaded Weigths from SavesModel4 to confirm values and generate new graphs.
+This script allows users to test a trained model on a new data, or to use that model to regenerate graphs.
+
+This currently works with the loaded weights from SavesModel4. 
+Run Loaded Weights from SavesModel4 to confirm values and generate new graphs.
 """
 base_model = ResNet50(weights='imagenet', 
                              input_shape=(180, 180, 3),
@@ -47,56 +50,6 @@ def make_model(input_shape, output_bias):
     outputs = layers.Dense(1, activation="sigmoid",bias_initializer=output_bias)(x)
     return keras.Model(inputs, outputs)
 
-
-""""
-
-#Code for SavesModel 3
-def make_model(input_shape, num_classes):
-    inputs = keras.Input(shape=input_shape)
-    # Image augmentation block
-    x = layers.Rescaling(1./255)(inputs)
-
-    # Entry block
-    x = layers.Conv2D(32, 3, strides=2, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    x = layers.Conv2D(64, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    previous_block_activation = x  # Set aside residual
-
-    for size in [128, 256, 512, 728]:
-        x = layers.Activation("relu")(x)
-        x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Activation("relu")(x)
-        x = layers.SeparableConv2D(size, 3, padding="same")(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.MaxPooling2D(3, strides=2, padding="same")(x)
-
-        # Project residual
-        residual = layers.Conv2D(size, 1, strides=2, padding="same")(
-            previous_block_activation
-        )
-        x = layers.add([x, residual])  # Add back residual
-        previous_block_activation = x  # Set aside next residual
-
-    x = layers.SeparableConv2D(1024, 3, padding="same")(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation("relu")(x)
-
-    x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.5)(x)
-
-    outputs = layers.Dense(1, activation="sigmoid")(x)
-    return keras.Model(inputs, outputs)
-
-# Evaluate the model
-"""
 
 #Only use test_ds for confirming the model's validity.
 test_ds = tf.keras.preprocessing.image_dataset_from_directory(

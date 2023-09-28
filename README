@@ -1,0 +1,9 @@
+Pipeline to create new model:
+1. Start with existing code in CVDMachineLearning/Models/classifycvd{some number}.py and copy it to create a new model.
+2. Move that model into CVDMachineLearning/
+3. Change any parameters required. Make sure change the output directory to be within a 
+SavesModel{new iteration number}/ directory that you make.
+4. If the model is successful, move the model back into CVDMachineLearning/Models/ and the SavesModel directory into SavedModelOutputs/ 
+
+Pipeline to test on existing model:
+

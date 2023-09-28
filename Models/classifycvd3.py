@@ -130,12 +130,12 @@ def make_model(input_shape, output_bias):
 model = make_model(input_shape=image_size + (3,) , output_bias=initial_bias)
 model.summary()
 
-epochs = 50
+epochs = 30
 
 callbacks = [
-    keras.callbacks.ModelCheckpoint("SavesModel3/save_at_{epoch}.h5"),
+    keras.callbacks.ModelCheckpoint("SavesModel3_1/save_at_{epoch}.h5"),
     keras.callbacks.EarlyStopping(
-    monitor='val_prc', 
+    monitor='val_auc', 
     verbose=1,
     patience=10,
     mode='max',
@@ -167,13 +167,9 @@ history = model.fit(
     class_weight=class_weight
 )
 
-plot_metrics(history)
+plot_metrics(history,"SavesModel3_1/history1")
 
-
-with open("SavesModel3/Evaluated", "w") as file:
+with open("SavesModel3_1/Evaluated", "w") as file:
     results = model.evaluate(test_ds)
     for name, value in zip(model.metrics_names, results):
         file.write(str(name)+': '+str(value)+"\n")
-
-
-

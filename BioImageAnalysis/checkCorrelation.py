@@ -9,7 +9,9 @@ df.drop(["firstPart","secondPart","article_id"], axis=1, inplace=True)
 
 withoutGray = df.loc[df["Conclusion"]!=-1]
 print(sum(withoutGray["is_rgb"] ==0))
-#Why are there still some left that are "is_rgb"==0?
+#Why are there still some left that are "is_rgb"==0?  -Arwen
+#Because some classified 'gray images' were techinically RGB, even though they appeared gray scale 
+#and were classified as such. -Harlan
 
 corrMatrix = withoutGray.corr()
 corrMatrix.to_csv("BioImageAnalysis/corrMatrix")
