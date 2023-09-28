@@ -110,5 +110,3 @@ for i in range(len(test_labels)):
     print(test_ds.file_paths[i], test_labels[i], predictions[i])
 
 plot_cm(test_labels, predictions, p=0.5, savePath="SavesModel7/PlotConfusionMatrix") #plot the confusion matrix.
-
-
