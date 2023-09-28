@@ -3,7 +3,7 @@ Pipeline to create new model:
 2. Move that model into CVDMachineLearning/
 3. Change any parameters required. Make sure change the output directory to be within a 
 SavesModel{new iteration number}/ directory that you make.
-4. Run the model with ./main.sh {name_of_model_python_file}
+4. Run the model with ./run.sh {name_of_model_python_file}
 5. If the model is successful, move the model back into CVDMachineLearning/Models/ and the SavesModel directory into SavedModelOutputs/
 
 Pipeline to test on existing model:
@@ -11,5 +11,5 @@ Pipeline to test on existing model:
 2. In TestTrainedModels, find the relevent script for running your model on new data. For example, if your model is from iteration 7, use "CVDMachineLearning/TestTrainedModels/saveModel5to7.py". 
 3. Change lines 7 through 9 to indicate your test image directory, your model weights, and your output directory.
 4. If you wish to run any custom functions to create graphs of the model performance, those can be added at the end of the file. 
-5. Run ./main.sh {name_of_save_model_python_file}. For example, "./main.sh TestTrainedModels/saveModel5to7.py
+5. Execute ./run.sh {name_of_save_model_python_file} at the terminal. For example, "./run.sh TestTrainedModels/saveModel5to7.py
 
