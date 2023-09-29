@@ -110,7 +110,7 @@ def make_model(input_shape, num_classes):
     x = layers.Activation("relu")(x)
 
     x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.5)(x) #Reduce overfitting
+    x = layers.Dropout(0.3)(x) #Reduce overfitting
 
     outputs = layers.Dense(1, activation="sigmoid")(x)
     return keras.Model(inputs, outputs)

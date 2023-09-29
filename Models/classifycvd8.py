@@ -2,7 +2,7 @@
 """
 CVD Machine Learning 8.0
 The model works the same as classifiycvd7.py, except changed monitor for early stopping to val_auc.
-2Added code to plot more metrics. Verified that our random seed produces the same results.
+Added code to plot more metrics. Verified that our random seed produces the same results.
 Model includes class weighing, early stoppping, data augmentation and transfer learning from MobileNetV2.
 Attempted fine tuning. An initial bias based on class weights is used.
 """
