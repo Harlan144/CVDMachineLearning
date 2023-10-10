@@ -46,6 +46,7 @@ model4_1['output_folder'] = "SavedModel4_1"
 
 model5 = model4_1.copy()
 model5["model_function"] = make_model_mobile_net2
+model5['transfer_learning_model'] = "MobileNetV2"
 model5['output_folder'] = "SavedModel5"
 
 
@@ -63,8 +64,8 @@ model10["image_size"] = 512
 model10['output_folder'] = "SavedModel10"
 
 
-#for num, model in enumerate([model0,model4,model4_1,model5,model6,model7,model10]):
-for num, model in enumerate([model0, model1,model2,model3,model4,model4_1,model5,model6,model7,model10]):
+for num, model in enumerate([model5,model6,model7,model10]):
+#for num, model in enumerate([model0, model1,model2,model3,model4,model4_1,model5,model6,model7,model10]):
     try:
         run_model(**model)
     except Exception as e:

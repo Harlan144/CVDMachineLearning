@@ -25,7 +25,7 @@ def make_model_mobile_net2(input_shape, output_bias, data_augmentation,base_mode
 
     x = data_augmentation(inputs) #apply augmentation
 
-    x = MobileNetV2.preprocess_input(x)
+    x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
 
     x = base_model(x, training=False) #Call our MobileNetV2 base_model.
 

@@ -1,0 +1,1 @@
+0{'model_function': <function make_model_mobile_net2 at 0x7f4d4e0ca440>, 'output_folder': 'SavedModel5', 'image_size': 224, 'include_class_weighing': True, 'early_stopping': True, 'random_rotation': 0.2, 'dropout': 0.3, 'epoch_count': 30, 'transfer_learning': True, 'transfer_learning_model': 'ResNet50', 'fine_tuning': True}
