@@ -154,6 +154,7 @@ history = model.fit(
     class_weight=class_weight
 )
 
+
 #Calls function in functions.py. Save a plot of precision, recall, PRC and loss through the epochs
 plot_metrics(history, "SavesModel7/history")
 
