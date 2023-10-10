@@ -35,6 +35,21 @@ def make_model_mobile_net2(input_shape, output_bias, data_augmentation,base_mode
     outputs = layers.Dense(1, activation="sigmoid", bias_initializer=output_bias)(x)
     return keras.Model(inputs, outputs)
 
+def make_model_mobile_net2_no_preprocess(input_shape, output_bias, data_augmentation,base_model, dropout=0.3):
+    if output_bias is not None:
+        output_bias = tf.keras.initializers.Constant(output_bias) #Use the initial_bias as defined above. Decreases initial loss.
+    inputs = keras.Input(shape=input_shape)
+
+    x = data_augmentation(inputs) #apply augmentation
+    x = base_model(x, training=False) #Call our MobileNetV2 base_model.
+
+    x = layers.GlobalAveragePooling2D()(x)
+    x = layers.Dropout(dropout)(x) #Used to decrease overfitting
+
+    outputs = layers.Dense(1, activation="sigmoid", bias_initializer=output_bias)(x)
+    return keras.Model(inputs, outputs)
+
+
 def make_model_resnet_50(input_shape, output_bias, data_augmentation, base_model, dropout=0.3):
 
     output_bias = tf.keras.initializers.Constant(output_bias)
@@ -305,7 +320,22 @@ def run_model(model_function = make_model_mobile_net2,
             restore_best_weights=True)
         ]
 
-        history1 = model.fit(train_ds, epochs=2,validation_data=val_ds, callbacks= new_callbacks)
+        if include_class_weighing:
+            history1 = model.fit(
+                train_ds,
+                epochs=epoch_count,
+                callbacks=new_callbacks,
+                validation_data=val_ds,
+                class_weight=class_weight
+            )
+        else:
+            history1 = model.fit(
+                train_ds,
+                epochs=epoch_count,
+                callbacks=new_callbacks,
+                validation_data=val_ds,
+            )
+
         print(history1.history.keys())
 
         historyDf1 = pd.DataFrame.from_dict(history1.history)

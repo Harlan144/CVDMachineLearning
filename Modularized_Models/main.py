@@ -64,14 +64,45 @@ model10["image_size"] = 512
 model10['output_folder'] = "SavedModel10"
 
 
-for num, model in enumerate([model5,model6,model7,model10]):
-#for num, model in enumerate([model0, model1,model2,model3,model4,model4_1,model5,model6,model7,model10]):
-    try:
-        run_model(**model)
-    except Exception as e:
-        print(e)
-        with open("error.log", "w") as logFile:
-            logFile.write(str(num))
-            logFile.write(str(model))
-            logFile.write(e)
+# for num, model in enumerate([model5,model6,model7,model10]):
+# #for num, model in enumerate([model0, model1,model2,model3,model4,model4_1,model5,model6,model7,model10]):
+#     try:
+#         run_model(**model)
+#     except Exception as e:
+#         print(e)
+#         with open("error.log", "w") as logFile:
+#             logFile.write(str(num))
+#             logFile.write(str(model))
+#             logFile.write(e)
     
+
+
+model11 = {
+    'model_function':make_model_mobile_net2_no_preprocess,
+    'output_folder':"SavedModel11",
+    'image_size':225,
+    'include_class_weighing':True,
+    'early_stopping':True,
+    'random_rotation':0.2,
+    'dropout':0.2,
+    'epoch_count':30,
+    'transfer_learning':True,
+    'transfer_learning_model':"MobileNetV2",
+    'fine_tuning':True
+}
+run_model(**model11)
+
+model12 = {
+    'model_function':make_model_mobile_net2_no_preprocess,
+    'output_folder':"SavedModel12",
+    'image_size':225,
+    'include_class_weighing':True,
+    'early_stopping':True,
+    'random_rotation':0.2,
+    'dropout':0.2,
+    'epoch_count':30,
+    'transfer_learning':True,
+    'transfer_learning_model':"MobileNetV2",
+    'fine_tuning':True
+}
+run_model(**model12)
