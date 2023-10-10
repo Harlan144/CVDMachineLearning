@@ -63,10 +63,8 @@ model10["image_size"] = 512
 model10['output_folder'] = "SavedModel10"
 
 
-
-#for model in [model1,model2,model3,model4,model4_1,model5,model6,model7,model10]:
-
-for num, model in enumerate([model0,model4,model4_1,model5,model6,model7,model10]):
+#for num, model in enumerate([model0,model4,model4_1,model5,model6,model7,model10]):
+for num, model in enumerate([model0, model1,model2,model3,model4,model4_1,model5,model6,model7,model10]):
     try:
         run_model(**model)
     except Exception as e:
